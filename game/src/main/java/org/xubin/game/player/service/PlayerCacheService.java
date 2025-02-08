@@ -1,31 +1,53 @@
 package org.xubin.game.player.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.xubin.game.base.EntityCacheService;
-import org.xubin.game.base.GameContext;
-import org.xubin.game.database.game.BaseEntity;
-import org.xubin.game.database.game.user.entity.PlayerEnt;
 import org.xubin.game.database.game.user.dao.PlayerDao;
+import org.xubin.game.database.game.user.entity.Player;
+import org.xubin.game.redis.RedisCacheService;
 
+import java.util.List;
+
+/**
+ * 玩家缓存服务
+ *
+ * @author xubin
+ */
 @Service
-public class PlayerCacheService implements EntityCacheService<PlayerEnt, Long> {
-    @Autowired
-    private PlayerDao playerDao;
+public class PlayerCacheService {
+    private final PlayerDao playerDao;
+    private final RedisCacheService<Player> cache;
 
-
-    @Override
-    @Cacheable(cacheNames = "player")
-    public PlayerEnt getEntity(Long id) {
-        return playerDao.findById(id).orElse(null);
+    public PlayerCacheService(RedisTemplate<String, Object> redisTemplate, PlayerDao playerDao) {
+        this.playerDao = playerDao;
+        cache = new RedisCacheService.Builder<Player>()
+                .setRedisTemplate(redisTemplate)
+                .setDao(playerDao)
+                .setCacheName("player")
+                .setEntityClass(Player.class)
+                .build();
     }
 
-    @Override
-    @CachePut(cacheNames = "player")
-    public BaseEntity<Long> putEntity(PlayerEnt entity) {
-        GameContext.getAsyncDbService().saveToDb(entity);
-        return entity;
+    public Player getPlayer(Long id) {
+        return cache.getEntity(id);
+    }
+
+    public void putPlayer(Player entity) {
+        cache.updateEntity(entity);
+    }
+
+    public void insertPlayer(Player entity) {
+        cache.insertEntity(entity);
+    }
+
+    public List<Player> listByAccountId(long accountId) {
+        return cache.getEntityFromMultipleList("accountId", String.valueOf(accountId));
+    }
+
+    public void loadPlayersByAccountId(long accountId) {
+        List<Player> players = playerDao.listByAccountId(accountId);
+        for (Player player : players) {
+            cache.cacheEntityIfNotExist(player);
+        }
     }
 }

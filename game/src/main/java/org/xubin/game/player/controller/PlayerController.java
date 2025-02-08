@@ -8,12 +8,12 @@ import org.xubin.game.player.message.c2s.PlayerTestC2S;
 import org.xubin.game.player.module.PlayerLevel;
 import xbgame.socket.share.IdSession;
 import xbgame.socket.share.annotation.MessageRoute;
-import org.xubin.game.commons.Module;
+import org.xubin.game.commons.Modules;
 import xbgame.socket.share.annotation.RequestHandler;
 
 @Controller
 @Slf4j
-@MessageRoute(module = Module.PLAYER)
+@MessageRoute(module = Modules.PLAYER)
 public class PlayerController {
 
     @RequestHandler

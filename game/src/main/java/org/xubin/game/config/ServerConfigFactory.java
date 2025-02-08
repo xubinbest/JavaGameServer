@@ -21,18 +21,18 @@ public class ServerConfigFactory {
     public void init() throws IOException {
         switch(GameContext.serverType) {
             case GATE:
-                environment.getPropertySources().addLast(new ResourcePropertySource("file:game/config/gate.properties"));
+                environment.getPropertySources().addLast(new ResourcePropertySource("file:config/gate.properties"));
                 break;
             case GAME:
-                environment.getPropertySources().addLast(new ResourcePropertySource("file:game/config/server.properties"));
+                environment.getPropertySources().addLast(new ResourcePropertySource("file:config/server.properties"));
                 break;
             case CENTRE:
-                environment.getPropertySources().addLast(new ResourcePropertySource("file:game/config/center.properties"));
+                environment.getPropertySources().addLast(new ResourcePropertySource("file:config/center.properties"));
                 break;
             default:
                 log.info("未知服务器类型 {}", GameContext.serverType);
                 break;
         }
-        environment.getPropertySources().addLast(new ResourcePropertySource("file:game/config/common.properties"));
+        environment.getPropertySources().addLast(new ResourcePropertySource("file:config/common.properties"));
     }
 }

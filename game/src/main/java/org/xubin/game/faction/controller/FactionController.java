@@ -1,11 +1,9 @@
 package org.xubin.game.faction.controller;
 
-import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.xubin.game.base.GameContext;
 import org.xubin.game.base.SessionManager;
-import org.xubin.game.commons.Module;
+import org.xubin.game.commons.Modules;
 import org.xubin.game.faction.message.c2s.*;
 import org.xubin.game.faction.service.FactionService;
 import xbgame.socket.share.IdSession;
@@ -13,7 +11,7 @@ import xbgame.socket.share.annotation.MessageRoute;
 import xbgame.socket.share.annotation.RequestHandler;
 
 @Controller
-@MessageRoute(module = Module.FACTION)
+@MessageRoute(module = Modules.FACTION)
 public class FactionController {
 
     @Autowired

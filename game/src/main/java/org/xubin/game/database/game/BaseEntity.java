@@ -16,5 +16,4 @@ public interface BaseEntity<ID extends Serializable & Comparable<ID>> {
     default boolean isDelete() {
         return isDelete;
     }
-
 }

@@ -3,6 +3,7 @@ package org.xubin.game.base;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -16,9 +17,10 @@ import org.xubin.game.bag.service.BagService;
 import org.xubin.game.config.ServerConfig;
 import org.xubin.game.config.ServerType;
 import org.xubin.game.data.DataCfgManager;
-import org.xubin.game.equip.EquipService;
+import org.xubin.game.equip.service.EquipService;
 import org.xubin.game.faction.service.FactionService;
 import org.xubin.game.player.service.PlayerService;
+import org.xubin.game.rpc.login.LoginClient;
 import xbgame.socket.share.message.MessageFactory;
 
 import java.lang.annotation.Annotation;
@@ -27,6 +29,7 @@ import java.util.Map;
 
 @Component
 @Setter(onMethod = @__(@Autowired))
+@Slf4j
 public class GameContext implements ApplicationContextAware {
 
     public static ServerType serverType;
@@ -51,7 +54,6 @@ public class GameContext implements ApplicationContextAware {
     }
 
     public ServerConfig serverConfig;
-
     public static ServerConfig getServerConfig() {
         return instance.serverConfig;
     }
@@ -65,6 +67,11 @@ public class GameContext implements ApplicationContextAware {
     private SessionManager sessionManager;
     public static SessionManager getSessionManager() {
         return instance.sessionManager;
+    }
+
+    private LoginClient loginClient;
+    public static LoginClient getLoginClient() {
+        return instance.loginClient;
     }
 
     private PlayerService playerService;

@@ -21,12 +21,13 @@ public class ProtobufMessageCodec implements MessageCodec {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public byte[] encode(Object message) {
         //写入具体消息的内容
         byte[] body = null;
-        Class msgClazz = message.getClass();
+        Class<?> msgClazz = message.getClass();
         try {
-            Codec<Object> codec = ProtobufProxy.create(msgClazz);
+            Codec<Object> codec = (Codec<Object>) ProtobufProxy.create(msgClazz);
             body = codec.encode(message);
         } catch (Exception e) {
             log.error("read message failed", e);

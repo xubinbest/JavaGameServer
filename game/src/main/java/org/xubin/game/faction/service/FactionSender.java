@@ -4,7 +4,7 @@ import org.xubin.game.base.GameContext;
 import org.xubin.game.database.game.faction.entity.Faction;
 import org.xubin.game.database.game.faction.entity.FactionApply;
 import org.xubin.game.database.game.faction.entity.FactionMember;
-import org.xubin.game.database.game.user.entity.PlayerEnt;
+import org.xubin.game.database.game.user.entity.Player;
 import org.xubin.game.faction.FactionUtils;
 import org.xubin.game.faction.message.s2c.*;
 import org.xubin.game.faction.message.vo.FactionApplyVo;
@@ -39,10 +39,10 @@ public class FactionSender {
         for (FactionMember factionMember : factionMemberList) {
             FactionMemberVo factionInfoVo = new FactionMemberVo();
             factionInfoVo.setId(factionMember.getId());
-            PlayerEnt playerEnt = playerService.getPlayer(factionMember.getId());
-            if (playerEnt != null) {
-                factionInfoVo.setName(playerEnt.getName());
-                factionInfoVo.setLevel(playerEnt.getLevel());
+            Player player = playerService.getPlayer(factionMember.getId());
+            if (player != null) {
+                factionInfoVo.setName(player.getName());
+                factionInfoVo.setLevel(player.getLevel());
             }
             factionInfoVoList.add(factionInfoVo);
         }
@@ -81,10 +81,10 @@ public class FactionSender {
         FactionApplyVo factionApplyVo = new FactionApplyVo();
 
         factionApplyVo.setPlayerId(factionApply.getPlayerId());
-        PlayerEnt playerEnt = GameContext.getPlayerService().getPlayer(factionApply.getPlayerId());
-        if (playerEnt != null) {
-            factionApplyVo.setPlayerName(playerEnt.getName());
-            factionApplyVo.setLevel(playerEnt.getLevel());
+        Player player = GameContext.getPlayerService().getPlayer(factionApply.getPlayerId());
+        if (player != null) {
+            factionApplyVo.setPlayerName(player.getName());
+            factionApplyVo.setLevel(player.getLevel());
         }
         msg.setApply(factionApplyVo);
 
@@ -109,10 +109,10 @@ public class FactionSender {
         FactionMemberVo factionMemberVo = new FactionMemberVo();
 
         factionMemberVo.setId(factionMember.getId());
-        PlayerEnt playerEnt = GameContext.getPlayerService().getPlayer(factionMember.getId());
-        if (playerEnt != null) {
-            factionMemberVo.setName(playerEnt.getName());
-            factionMemberVo.setLevel(playerEnt.getLevel());
+        Player player = GameContext.getPlayerService().getPlayer(factionMember.getId());
+        if (player != null) {
+            factionMemberVo.setName(player.getName());
+            factionMemberVo.setLevel(player.getLevel());
         }
         msg.setMember(factionMemberVo);
 
@@ -135,10 +135,10 @@ public class FactionSender {
         for (FactionApply factionApply : factionApplyList) {
             FactionApplyVo factionApplyVo = new FactionApplyVo();
             factionApplyVo.setPlayerId(factionApply.getPlayerId());
-            PlayerEnt playerEnt = playerService.getPlayer(factionApply.getPlayerId());
-            if (playerEnt != null) {
-                factionApplyVo.setPlayerName(playerEnt.getName());
-                factionApplyVo.setLevel(playerEnt.getLevel());
+            Player player = playerService.getPlayer(factionApply.getPlayerId());
+            if (player != null) {
+                factionApplyVo.setPlayerName(player.getName());
+                factionApplyVo.setLevel(player.getLevel());
             }
             factionApplyVoList.add(factionApplyVo);
         }

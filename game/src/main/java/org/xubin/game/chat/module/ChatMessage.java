@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.xubin.game.base.GameContext;
 import org.xubin.game.chat.msg.ChatC2S;
-import org.xubin.game.database.game.user.entity.PlayerEnt;
+import org.xubin.game.database.game.user.entity.Player;
 
 @Getter
 @Setter
@@ -17,7 +17,7 @@ public class ChatMessage {
     private long timestamp;
 
     public ChatMessage(long senderId, ChatC2S msg) {
-        PlayerEnt player = GameContext.getPlayerService().getPlayer(senderId);
+        Player player = GameContext.getPlayerService().getPlayer(senderId);
         this.channelType = (short)msg.getChannelType();
         this.senderId = senderId;
         this.senderName = player.getName();

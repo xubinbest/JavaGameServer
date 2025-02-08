@@ -10,6 +10,7 @@ import xbgame.socket.share.message.MessageFactory;
 import xbgame.socket.support.DefaultMessageHandlerRegister;
 import xbgame.socket.support.MessageExecuteUnit;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +28,8 @@ public class CommonMessageHandlerRegister extends DefaultMessageHandlerRegister 
 
         for (Class<?> controller : controllers) {
             try {
-                Object handler = controller.newInstance();
+                Constructor<?> constructor =  controller.getDeclaredConstructor();
+                Object handler = constructor.newInstance();
                 register(handler);
             } catch (Exception e) {
                 log.error("", e);

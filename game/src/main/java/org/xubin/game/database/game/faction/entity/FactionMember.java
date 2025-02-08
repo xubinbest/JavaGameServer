@@ -12,6 +12,8 @@ import org.xubin.game.base.GameContext;
 import org.xubin.game.database.game.BaseEntity;
 import org.xubin.game.database.game.faction.dao.FactionMemberDao;
 import org.xubin.game.faction.FactionPosition;
+import org.xubin.game.redis.CacheIndex;
+import org.xubin.game.redis.CacheIndexType;
 
 /**
  * 公会成员
@@ -26,6 +28,7 @@ public class FactionMember implements BaseEntity<Long> {
     @Id
     private long id;
     @Column
+    @CacheIndex(type = CacheIndexType.MULTIPLE)
     private long factionId;
     @Column
     private long time;
@@ -64,12 +67,19 @@ public class FactionMember implements BaseEntity<Long> {
         return GameContext.getBean(FactionMemberDao.class);
     }
 
-    public void setDelete() {
-        isDelete = true;
-    }
-
     @Override
     public boolean isDelete() {
         return isDelete;
+    }
+
+    @Override
+    public String toString() {
+        return "FactionMember{" +
+                "id=" + id +
+                ", factionId=" + factionId +
+                ", time=" + time +
+                ", position=" + position +
+                ", isDelete=" + isDelete +
+                '}';
     }
 }

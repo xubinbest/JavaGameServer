@@ -10,7 +10,6 @@ import org.xubin.game.login.events.PlayerLoginEvent;
 public class BagListener {
     @EventHandler(value = EventType.LOGIN)
     public void onPlayerLogin(PlayerLoginEvent event) {
-        GameContext.getBagService().checkLoadPlayerItem(event.getPlayerId());
-
+        GameContext.getBagService().loadPlayerItem(event.getPlayerId());
     }
 }

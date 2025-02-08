@@ -24,7 +24,7 @@ import java.util.Properties;
 public class GameApplication {
 
     public static void main(String[] args) throws Exception {
-        Properties commonProperty = PropertiesLoaderUtils.loadProperties(new FileSystemResource("game/config/common.properties"));
+        Properties commonProperty = PropertiesLoaderUtils.loadProperties(new FileSystemResource("config/common.properties"));
         ServerType serverType = ServerType.of(NumberUtil.intValue(commonProperty.get("server.type")));
         GameContext.serverType = serverType;
 

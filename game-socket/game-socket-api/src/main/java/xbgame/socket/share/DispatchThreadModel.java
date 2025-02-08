@@ -7,6 +7,7 @@ import xbgame.socket.share.task.BaseGameTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class DispatchThreadModel implements ThreadModel {
@@ -14,6 +15,7 @@ public class DispatchThreadModel implements ThreadModel {
     private final Worker[] workerPool;
 
     private static final AtomicBoolean running = new AtomicBoolean(true);
+    private static final AtomicInteger threadIndex = new AtomicInteger(0);
 
     public DispatchThreadModel() {
         this(Runtime.getRuntime().availableProcessors());
@@ -59,7 +61,8 @@ public class DispatchThreadModel implements ThreadModel {
         if (!running.get()) {
             return;
         }
-        int distributeKey = (int) (task.getDispatchKey() % workerPool.length);
+//        int distributeKey = (int) (task.getDispatchKey() % workerPool.length);
+        int distributeKey = threadIndex.getAndIncrement() % workerPool.length;
         workerPool[distributeKey].receive(task);
     }
 

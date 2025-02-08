@@ -5,7 +5,7 @@ import org.xubin.game.commons.utils.IdGenerator;
 import org.xubin.game.database.game.faction.entity.Faction;
 import org.xubin.game.database.game.faction.entity.FactionApply;
 import org.xubin.game.database.game.faction.entity.FactionMember;
-import org.xubin.game.database.game.user.entity.PlayerEnt;
+import org.xubin.game.database.game.user.entity.Player;
 import org.xubin.game.faction.message.vo.FactionInfoVo;
 
 public class FactionUtils {
@@ -16,9 +16,9 @@ public class FactionUtils {
         factionInfoVo.setId(faction.getId());
         factionInfoVo.setName(faction.getName());
         factionInfoVo.setLevel(faction.getLevel());
-        PlayerEnt playerEnt = GameContext.getPlayerService().getPlayer(faction.getLeaderId());
-        if (playerEnt != null) {
-            factionInfoVo.setLeaderName(playerEnt.getName());
+        Player player = GameContext.getPlayerService().getPlayer(faction.getLeaderId());
+        if (player != null) {
+            factionInfoVo.setLeaderName(player.getName());
         }
         factionInfoVo.setNotice(faction.getNotice());
         factionInfoVo.setMemberNum(faction.getMemberNum());

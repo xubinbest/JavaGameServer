@@ -7,12 +7,12 @@ import org.xubin.game.chat.ChatService;
 import org.xubin.game.chat.msg.ChatC2S;
 import xbgame.socket.share.IdSession;
 import xbgame.socket.share.annotation.MessageRoute;
-import org.xubin.game.commons.Module;
+import org.xubin.game.commons.Modules;
 import xbgame.socket.share.annotation.RequestHandler;
 
 @Controller
 @Slf4j
-@MessageRoute(module = Module.CHAT)
+@MessageRoute(module = Modules.CHAT)
 public class ChatController {
 
     @Autowired

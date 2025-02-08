@@ -6,7 +6,7 @@ import org.xubin.game.attribute.BaseAttr;
 import org.xubin.game.base.GameContext;
 import org.xubin.game.data.DataCfgManager;
 import org.xubin.game.data.data.LevelCfg;
-import org.xubin.game.database.game.user.entity.PlayerEnt;
+import org.xubin.game.database.game.user.entity.Player;
 import org.xubin.game.listener.EventDispatcher;
 import org.xubin.game.listener.EventType;
 import org.xubin.game.player.events.PlayerLevelUpEvent;
@@ -19,36 +19,36 @@ import java.util.Map;
 public class PlayerLevel {
 
     public static void addExp(long playerId, long exp) {
-        PlayerEnt playerEnt = GameContext.getPlayerService().getPlayer(playerId);
-        long curExp = playerEnt.getExp();
+        Player player = GameContext.getPlayerService().getPlayer(playerId);
+        long curExp = player.getExp();
         long newExp = curExp + exp;
-        playerEnt.setExp(newExp);
-        int level = playerEnt.getLevel();
+        player.setExp(newExp);
+        int level = player.getLevel();
         log.info("Player {} add exp, curExp={}, newExp={}, level={}", playerId, curExp, newExp, level);
-        checkLevelUp(playerEnt);
-        GameContext.getPlayerService().savePlayer(playerEnt);
-        sendLevelUpdate(playerEnt);
-        if (level != playerEnt.getLevel()) {
+        checkLevelUp(player);
+        GameContext.getPlayerService().savePlayer(player);
+        sendLevelUpdate(player);
+        if (level != player.getLevel()) {
             PlayerLevelUpEvent event = new PlayerLevelUpEvent(EventType.PLAYER_LEVEL_UP, playerId);
             EventDispatcher.getInstance().triggerEvent(event);
         }
     }
 
-    public static void sendLevelUpdate(PlayerEnt playerEnt) {
-        long playerId = playerEnt.getId();
+    public static void sendLevelUpdate(Player player) {
+        long playerId = player.getId();
         IdSession session = GameContext.getSessionManager().getSessionBy(playerId);
         if (session == null) {
             return;
         }
         PlayerLevelUpdateS2C msg = new PlayerLevelUpdateS2C();
-        msg.setLevel(playerEnt.getLevel());
-        msg.setExp(playerEnt.getExp());
+        msg.setLevel(player.getLevel());
+        msg.setExp(player.getExp());
         session.send(msg);
     }
 
-    public static void checkLevelUp(PlayerEnt playerEnt) {
-        int level = playerEnt.getLevel();
-        long exp = playerEnt.getExp();
+    public static void checkLevelUp(Player player) {
+        int level = player.getLevel();
+        long exp = player.getExp();
 
         Map<Long, Object> dataCfgMap = GameContext.getDataCfgManager().getDataCfg("LevelCfg");
 
@@ -80,14 +80,14 @@ public class PlayerLevel {
             }
             needExp = levelCfg.getExp();
         }
-        playerEnt.setLevel(level);
-        playerEnt.setExp(exp);
+        player.setLevel(level);
+        player.setExp(exp);
     }
 
     // 获取玩家等级属性
     public static BaseAttr getLevelAttr(long playerId) {
-        PlayerEnt playerEnt = GameContext.getPlayerService().getPlayer(playerId);
-        int level = playerEnt.getLevel();
+        Player player = GameContext.getPlayerService().getPlayer(playerId);
+        int level = player.getLevel();
         return calcLevelAttr(level);
     }
 

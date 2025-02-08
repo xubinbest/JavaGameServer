@@ -7,12 +7,12 @@ import org.xubin.game.bag.message.c2s.BagInfoC2S;
 import org.xubin.game.base.GameContext;
 import xbgame.socket.share.IdSession;
 import xbgame.socket.share.annotation.MessageRoute;
-import org.xubin.game.commons.Module;
+import org.xubin.game.commons.Modules;
 import xbgame.socket.share.annotation.RequestHandler;
 
 @Controller
 @Slf4j
-@MessageRoute(module = Module.BAG)
+@MessageRoute(module = Modules.BAG)
 public class BagController {
 
     @RequestHandler

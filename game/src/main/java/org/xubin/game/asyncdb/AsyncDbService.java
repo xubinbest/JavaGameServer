@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.xubin.game.base.GameContext;
 import org.xubin.game.config.ServerType;
 import org.xubin.game.database.game.BaseEntity;
-import org.xubin.game.database.game.user.entity.PlayerEnt;
+import org.xubin.game.database.game.user.entity.Player;
 import xbgame.commons.ds.ConcurrentHashSet;
 import xbgame.commons.thread.NamedThreadFactory;
 
@@ -36,7 +36,7 @@ public class AsyncDbService {
             return;
         }
 
-        if(entity instanceof PlayerEnt) {
+        if(entity instanceof Player) {
             playerWorker.add2Queue(entity);
         } else {
             commonWorker.add2Queue(entity);

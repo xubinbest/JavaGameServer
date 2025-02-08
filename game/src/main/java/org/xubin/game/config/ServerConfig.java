@@ -23,17 +23,14 @@ public class ServerConfig {
     @Value("${socket.port:0}")
     private int serverPort;
 
-    @Value("${rpc.port}")
-    private int rpcPort;
-
-    @Value("${http.port:0}")
-    private int httpPort;
-
-    @Value("${webSocket.port:0}")
-    private int webSocketPort;
-
     @Value("${admin.http.ips}")
     private String adminIps;
+
+    @Value("${login.serverIp}")
+    private String loginServerIp;
+
+    @Value("${login.port:0}")
+    private int loginServerPort;
 
 
     private Set<String> adminWhiteIps;

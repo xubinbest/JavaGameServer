@@ -2,7 +2,7 @@ package org.xubin.game.player.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.xubin.game.base.GameContext;
-import org.xubin.game.database.game.user.entity.PlayerEnt;
+import org.xubin.game.database.game.user.entity.Player;
 import org.xubin.game.listener.EventType;
 import org.xubin.game.listener.annotation.EventHandler;
 import org.xubin.game.listener.annotation.Listener;
@@ -19,18 +19,18 @@ public class PlayerListener {
     }
 
     private void sendPlayerBaseInfo(long playerId) {
-        PlayerEnt playerEnt = GameContext.getPlayerService().getPlayer(playerId);
-        if (playerEnt == null) {
+        Player player = GameContext.getPlayerService().getPlayer(playerId);
+        if (player == null) {
             log.error("player not found:{}", playerId);
             return;
         }
 
         PlayerBaseInfoS2C msg = new PlayerBaseInfoS2C();
-        msg.setPlayerId(playerEnt.getId());
-        msg.setName(playerEnt.getName());
-        msg.setLevel(playerEnt.getLevel());
-        msg.setExp(playerEnt.getExp());
-        msg.setMoney(playerEnt.getMoney());
+        msg.setPlayerId(player.getId());
+        msg.setName(player.getName());
+        msg.setLevel(player.getLevel());
+        msg.setExp(player.getExp());
+        msg.setMoney(player.getMoney());
         GameContext.getSessionManager().getSessionBy(playerId).send(msg);
     }
 

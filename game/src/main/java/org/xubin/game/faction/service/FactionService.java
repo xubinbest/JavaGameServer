@@ -1,26 +1,20 @@
 package org.xubin.game.faction.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.xubin.game.asyncdb.AsyncDbService;
-import org.xubin.game.database.game.BaseEntity;
-import org.xubin.game.database.game.faction.dao.FactionApplyDao;
-import org.xubin.game.database.game.faction.dao.FactionDao;
-import org.xubin.game.database.game.faction.dao.FactionMemberDao;
 import org.xubin.game.database.game.faction.entity.Faction;
 import org.xubin.game.database.game.faction.entity.FactionApply;
 import org.xubin.game.database.game.faction.entity.FactionMember;
 import org.xubin.game.faction.FactionPosition;
 import org.xubin.game.faction.FactionUtils;
+import org.xubin.game.faction.cache.FactionApplyCacheService;
+import org.xubin.game.faction.cache.FactionCacheService;
+import org.xubin.game.faction.cache.FactionMemberCacheService;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 公会服务
@@ -29,25 +23,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Slf4j
 public class FactionService {
-
-    private final Map<Long, Faction> factionMap = new ConcurrentHashMap<>();
-    private final Map<Long, FactionMember> factionMemberMap = new ConcurrentHashMap<>();
-    private final Map<Long, Map<Long, FactionMember>> factionMemberListMap = new ConcurrentHashMap<>();
-    private final Map<Long, Map<Long, FactionApply>> factionApplyMap = new ConcurrentHashMap<>();
-
     @Autowired
-    private FactionDao factionDao;
+    private FactionCacheService factionCache;
     @Autowired
-    private FactionMemberDao factionMemberDao;
+    private FactionMemberCacheService factionMemberCache;
     @Autowired
-    private FactionApplyDao factionApplyDao;
-    @Autowired
-    private AsyncDbService asyncDbService;
-
-    @PostConstruct
-    public void init() {
-        loadFaction();
-    }
+    private FactionApplyCacheService factionApplyCache;
 
     /**
      * 推送公会信息
@@ -104,8 +85,7 @@ public class FactionService {
      */
     public void createFaction(long playerId, String factionName) {
         Faction faction = FactionUtils.newFaction(playerId, factionName);
-        saveDb(faction);
-        factionMap.put(faction.getId(), faction);
+        factionCache.insertFaction(faction);
         createFactionMember(playerId, faction.getId(), FactionPosition.LEADER);
         FactionSender.sendCreateFactionS2C(playerId, 0, faction);
     }
@@ -142,15 +122,16 @@ public class FactionService {
             return;
         }
 
-        Map<Long, FactionApply> applyList = factionApplyMap.computeIfAbsent(factionId, k -> new ConcurrentHashMap<>());
-        if (applyList.containsKey(playerId)) {
-            FactionSender.sendApplyFactionS2C(playerId, 3, factionId);
-            return;
+        List<FactionApply> applyList = factionApplyCache.listByFactionId(factionId);
+        for (FactionApply apply : applyList) {
+            if (apply.getPlayerId() == playerId) {
+                FactionSender.sendApplyFactionS2C(playerId, 3, factionId);
+                return;
+            }
         }
 
         FactionApply factionApply = FactionUtils.newFactionApply(playerId, factionId);
-        saveDb(factionApply);
-        applyList.put(playerId, factionApply);
+        factionApplyCache.insertFactionApply(factionApply);
         FactionSender.sendApplyFactionS2C(playerId, 0, factionId);
         broadcastNewApply(factionApply);
     }
@@ -197,15 +178,7 @@ public class FactionService {
     }
 
     private void removeFactionApply(FactionApply apply) {
-        apply.setDelete(true);
-        saveDb(apply);
-        long factionId = apply.getFactionId();
-        long playerId = apply.getPlayerId();
-        Map<Long, FactionApply> applyList = factionApplyMap.get(factionId);
-        if (applyList == null) {
-            return;
-        }
-        applyList.remove(playerId);
+        factionApplyCache.removeFactionApply(apply);
     }
 
     // 同意申请
@@ -291,13 +264,10 @@ public class FactionService {
     }
 
     private void removeFactionMember(FactionMember member) {
-        long factionId = member.getFactionId();
-        long playerId = member.getId();
-        factionMemberListMap.get(factionId).remove(playerId);
-        member.setDelete();
-        saveDb(member);
+        factionMemberCache.removeFactionMember(member);
     }
 
+    // 处理成员离开
     private void dealMemberLeave(FactionMember member) {
         long factionId = member.getFactionId();
         long playerId = member.getId();
@@ -315,18 +285,28 @@ public class FactionService {
             case LEADER:
                 dealLeaderLeave(member);
                 break;
+            default:
+                break;
         }
     }
 
+    // 处理帮主离开
     private void dealLeaderLeave(FactionMember member) {
         long factionId = member.getFactionId();
-        Map<Long, FactionMember> memberList = factionMemberListMap.get(factionId);
-        if (memberList == null) {
+
+        Faction faction = getFaction(factionId);
+        if (faction == null) {
+            return;
+        }
+
+        List<FactionMember> memberList = factionMemberCache.listByFactionId(factionId);
+        if (memberList == null || memberList.isEmpty()) {
+            factionCache.removeFaction(faction);
             return;
         }
 
         FactionMember newLeader = null;
-        for (FactionMember factionMember : memberList.values()) {
+        for (FactionMember factionMember : memberList) {
             if (!Objects.equals(factionMember.getId(), member.getId())) {
                 newLeader = factionMember;
                 break;
@@ -334,9 +314,10 @@ public class FactionService {
         }
 
         if (newLeader == null) {
-            factionMap.remove(factionId);
+            factionCache.removeFaction(faction);
         } else {
-            factionMap.get(factionId).setLeaderId(newLeader.getId());
+            faction.setLeaderId(newLeader.getId());
+            factionCache.putFaction(faction);
             newLeader.setPosition(FactionPosition.LEADER.getValue());
         }
     }
@@ -347,7 +328,7 @@ public class FactionService {
      * @return 公会列表
      */
     public List<Faction> getFactionList() {
-        return new ArrayList<>(factionMap.values());
+        return factionCache.getAllFactions();
     }
 
     /**
@@ -356,7 +337,7 @@ public class FactionService {
      * @return 公会
      */
     public Faction getFaction(long factionId) {
-        return factionMap.get(factionId);
+        return factionCache.getFaction(factionId);
     }
 
     /**
@@ -365,15 +346,11 @@ public class FactionService {
      * @return 公会成员列表
      */
     public List<FactionMember> getFactionMemberList(long factionId) {
-        return factionMemberListMap.get(factionId).values().stream().toList();
+        return factionMemberCache.listByFactionId(factionId);
     }
 
     public List<Long> getFactionMemberIdList(long factionId) {
-        Map<Long, FactionMember> memberList = factionMemberListMap.get(factionId);
-        if (memberList == null) {
-            return new ArrayList<>();
-        }
-        return new ArrayList<>(memberList.keySet());
+        return factionMemberCache.idListByFactionId(factionId);
     }
 
     /**
@@ -382,7 +359,7 @@ public class FactionService {
      * @return 公会成员
      */
     public FactionMember getFactionMember(long factionMemberId) {
-        return factionMemberMap.get(factionMemberId);
+        return factionMemberCache.getFactionMember(factionMemberId);
     }
 
     /**
@@ -391,42 +368,7 @@ public class FactionService {
      * @return 公会申请列表
      */
     public List<FactionApply> getFactionApplyList(long factionId) {
-        Map<Long, FactionApply> applyMap = factionApplyMap.get(factionId);
-        if(applyMap == null) {
-            return new ArrayList<>();
-        }
-        return applyMap.values().stream().toList();
-    }
-
-
-    // 加载公会
-    private void loadFaction() {
-        List<Faction> factionList = factionDao.findAll();
-        for(Faction faction : factionList) {
-            factionMap.put(faction.getId(), faction);
-        }
-        loadFactionMember();
-        loadFactionApply();
-    }
-
-    // 加载公会成员
-    private void loadFactionMember() {
-        List<FactionMember> factionMemberList = factionMemberDao.findAll();
-        for (FactionMember factionMember : factionMemberList) {
-            factionMemberMap.put(factionMember.getId(), factionMember);
-            Map<Long, FactionMember> memberList = factionMemberListMap.computeIfAbsent(factionMember.getFactionId(), k -> new ConcurrentHashMap<>());
-            memberList.put(factionMember.getId(), factionMember);
-        }
-    }
-
-    // 加载公会申请
-    private void loadFactionApply() {
-        List<FactionApply> factionApplieList = factionApplyDao.findAll();
-        for (FactionApply factionApply : factionApplieList) {
-            long factionId = factionApply.getFactionId();
-            Map<Long, FactionApply> applyList = factionApplyMap.computeIfAbsent(factionId, k -> new ConcurrentHashMap<>());
-            applyList.put(factionApply.getPlayerId(), factionApply);
-        }
+        return factionApplyCache.listByFactionId(factionId);
     }
 
     // 给管理员推送新的申请 当前只有帮主
@@ -438,12 +380,12 @@ public class FactionService {
     // 获取公会管理员列表
     private List<Long> getFactionManagerIdList(long factionId) {
         List<Long> managerList = new ArrayList<>();
-        Map<Long, FactionMember> memberList = factionMemberListMap.get(factionId);
+        List<FactionMember> memberList = factionMemberCache.listByFactionId(factionId);
 
-        if (memberList == null) {
+        if (memberList == null || memberList.isEmpty()) {
             return managerList;
         }
-        for (FactionMember factionMember : memberList.values()) {
+        for (FactionMember factionMember : memberList) {
             if (factionMember.isManager()) {
                 managerList.add(factionMember.getId());
             }
@@ -459,29 +401,19 @@ public class FactionService {
     // 创建公会成员
     private FactionMember createFactionMember(long playerId, long factionId, FactionPosition position) {
         FactionMember factionMember = FactionUtils.newFactionMember(playerId, factionId, position);
-        saveDb(factionMember);
-        factionMemberMap.put(factionMember.getId(), factionMember);
-        Map<Long, FactionMember> memberList = factionMemberListMap.computeIfAbsent(factionId, k -> new ConcurrentHashMap<>());
-        memberList.put(factionMember.getId(), factionMember);
+        factionMemberCache.insertFactionMember(factionMember);
         return factionMember;
     }
 
     // 获取公会一个申请
     private FactionApply getFactionApply(long factionId, long playerId) {
-        Map<Long, FactionApply> applyList = factionApplyMap.get(factionId);
-        if (applyList == null) {
-            return null;
+        List<FactionApply> applyList = factionApplyCache.listByFactionId(factionId);
+        for (FactionApply apply : applyList) {
+            if (apply.getPlayerId() == playerId) {
+                return apply;
+            }
         }
-        return applyList.get(playerId);
+        return null;
     }
 
-    private void saveDb(BaseEntity<? extends Serializable> data) {
-        if (isOpenDb()) {
-            asyncDbService.saveToDb(data);
-        }
-    }
-
-    private boolean isOpenDb() {
-        return false;
-    }
 }

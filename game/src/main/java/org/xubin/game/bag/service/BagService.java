@@ -2,7 +2,6 @@ package org.xubin.game.bag.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jms.JmsProperties;
 import org.springframework.stereotype.Service;
 import org.xubin.game.bag.message.s2c.BagInfoS2C;
 import org.xubin.game.bag.message.s2c.BagItemUpdateS2C;
@@ -12,14 +11,10 @@ import org.xubin.game.base.GameContext;
 import org.xubin.game.commons.utils.IdGenerator;
 import org.xubin.game.data.DataCfgManager;
 import org.xubin.game.data.data.ItemCfg;
-import org.xubin.game.database.game.item.dao.ItemDao;
-import org.xubin.game.database.game.item.entity.ItemEnt;
-import org.xubin.game.item.Item;
-import xbgame.commons.ds.ConcurrentHashSet;
+import org.xubin.game.database.game.item.entity.Item;
 import xbgame.socket.share.IdSession;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 背包
@@ -29,34 +24,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class BagService {
     @Autowired
-    private ItemDao itemDao;
-
-    private Set<Long> hadLoadPlayerIds = new ConcurrentHashSet<>();
-    private Map<Long, Map<Long, Item>> bagMap = new ConcurrentHashMap<>();
+    private BagCacheService bagCache;
     @Autowired
     private DataCfgManager dataCfgManager;
 
-    public boolean isHadLoad(long playerId) {
-        return hadLoadPlayerIds.contains(playerId);
-    }
-
-    public void loadItemList(long playerId) {
-        List<Item> itemList = itemDao.getItemListByPlayerId(playerId);
-        Map<Long, Item> itemMap = new HashMap<>();
-
-        for(Item item : itemList) {
-            itemMap.put(item.getId(), item);
-        }
-
-        bagMap.put(playerId, itemMap);
-        hadLoadPlayerIds.add(playerId);
-    }
-
-    public void checkLoadPlayerItem(long playerId) {
-        if (!isHadLoad(playerId)) {
-            loadItemList(playerId);
-            GameContext.getEquipService().initPlayerEquip(playerId);
-        }
+    public void loadPlayerItem(long playerId) {
+        bagCache.loadPlayerItems(playerId);
     }
 
     public void addItemByItemId(long playerId, long itemId, int num) {
@@ -158,33 +131,11 @@ public class BagService {
     }
 
     private void addItem(Item item) {
-        long playerId = item.getPlayerId();
-        Map<Long, Item> itemMap = bagMap.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>());
-        itemMap.put(item.getId(), item);
-        saveDb(item);
-    }
-
-    public void saveDb(Item item) {
-        ItemEnt itemEnt = new ItemEnt();
-        itemEnt.setId(item.getId());
-        itemEnt.setItemId(item.getItemId());
-        itemEnt.setPlayerId(item.getPlayerId());
-        itemEnt.setNum(item.getNum());
-        itemEnt.setColor(item.getColor().getValue());
-        itemEnt.setType(item.getType().getValue());
-        itemEnt.setInUse(item.getInUse());
-        GameContext.getAsyncDbService().saveToDb(itemEnt);
+        bagCache.insertItem(item);
     }
 
     public void updateItem(Item item) {
-        long playerId = item.getPlayerId();
-        Map<Long, Item> itemMap = bagMap.get(playerId);
-        if (itemMap == null) {
-            log.error("updateItem error, itemMap is null, playerId:{}", playerId);
-            return;
-        }
-        itemMap.put(item.getId(), item);
-        saveDb(item);
+        bagCache.putItem(item);
     }
 
     public void sendNewItems(long playerId, List<Item> items) {
@@ -218,30 +169,18 @@ public class BagService {
     }
 
     public Item getItemById(long playerId, long id) {
-        Map<Long, Item> itemMap = bagMap.get(playerId);
-        if (itemMap == null) {
-            return null;
-        }
-
-        return itemMap.get(id);
+        return bagCache.listByPlayerId(playerId).stream().filter(item -> item.getId() == id).findFirst().orElse(null);
     }
 
     public List<Item> getAllItems(long playerId) {
-        Map<Long, Item> itemMap = bagMap.get(playerId);
-        if (itemMap == null) {
-            return null;
-        }
-        return List.copyOf(itemMap.values());
+        return bagCache.listByPlayerId(playerId);
     }
 
     public List<Item> getItemByItemId(long playerId, long itemId) {
-        Map<Long, Item> itemMap = bagMap.get(playerId);
         List<Item> items = new ArrayList<>();
-        if (itemMap == null) {
-            return items;
-        }
+        List<Item> itemList = bagCache.listByPlayerId(playerId);
 
-        for(Item item : itemMap.values()) {
+        for(Item item : itemList) {
             if (item.getItemId() == itemId) {
                 items.add(item);
             }
@@ -250,18 +189,17 @@ public class BagService {
     }
 
     public void removeItemByItemUid(long playerId, long itemUid) {
-        Map<Long, Item> itemMap = bagMap.get(playerId);
-        if (itemMap == null) {
+        Item item = bagCache.getItem(itemUid);
+        if (item == null || item.getPlayerId() != playerId) {
             return;
         }
-        itemMap.remove(itemUid);
+        bagCache.removeItem(item);
     }
 
 
     // 发送背包信息
     public void sendBagInfo(IdSession session) {
         long playerId = GameContext.getSessionManager().getPlayerIdBy(session);
-        checkLoadPlayerItem(playerId);
         List<Item> itemList = getAllItems(playerId);
         List<ItemVo> list = new ArrayList<>();
         for (Item item : itemList) {
@@ -278,7 +216,7 @@ public class BagService {
         itemVo.setId(item.getId());
         itemVo.setItemId(item.getItemId());
         itemVo.setNum(item.getNum());
-        itemVo.setColor(item.getColor().getValue());
+        itemVo.setColor(item.getColor());
         itemVo.setInUse(item.getInUse());
         return itemVo;
     }

@@ -39,7 +39,7 @@ public class MessageIoDispatcher extends ChainedMessageDispatcher {
             }
 //            if (message instanceof BattleMessage) {
 //                if (GameContext.serverType == ServerType.GAME) {
-//                    PlayerEnt player = (PlayerEnt) session.getAttribute("PLAYER");
+//                    Player player = (Player) session.getAttribute("PLAYER");
 //                    BattleMessage battleMessage = (BattleMessage) message;
 //                    int battleSid = battleMessage.getBattleServerId(player);
 //                    if (battleSid > 0) {
@@ -57,11 +57,11 @@ public class MessageIoDispatcher extends ChainedMessageDispatcher {
 
             Object controller = cmdExecutor.getHandler();
 
-            Object playerEnt = session.getAttribute("PLAYER");
+            Object player = session.getAttribute("PLAYER");
 
             long dispatchKey = 0;
-            if (playerEnt != null) {
-//                dispatchKey = ((PlayerEnt) playerEnt).dispatchKey();
+            if (player != null) {
+//                dispatchKey = ((Player) player).dispatchKey();
                 // TODO: 临时屏蔽
             }
             MessageTask task = MessageTask.valueOf(session, dispatchKey, controller, cmdExecutor.getMethod(), params);

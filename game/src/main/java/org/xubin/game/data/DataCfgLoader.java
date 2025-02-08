@@ -27,7 +27,7 @@ public class DataCfgLoader {
 
     public void loadCfg() throws Exception {
         // 获取game/data/ 下所有的excel文件
-        File file = new File("game/data/");
+        File file = new File("data/");
         File[] files = file.listFiles();
         for (File f : files) {
             if(f.getName().endsWith(".xlsx")) {

@@ -6,11 +6,11 @@ import org.xubin.game.test.message.TestHeartC2S;
 import org.xubin.game.test.message.TestHeartS2C;
 import xbgame.socket.share.IdSession;
 import xbgame.socket.share.annotation.MessageRoute;
-import org.xubin.game.commons.Module;
+import org.xubin.game.commons.Modules;
 import xbgame.socket.share.annotation.RequestHandler;
 
 @Controller
-@MessageRoute(module = Module.TEST)
+@MessageRoute(module = Modules.TEST)
 @Slf4j
 public class TestController {
 

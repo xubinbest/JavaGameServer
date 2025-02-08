@@ -135,11 +135,11 @@ public class ExcelToJavaClassGenerator {
     public static void main(String[] args) {
         try {
             // 获取game/data/ 下所有的excel文件
-            File file = new File("game/data/");
+            File file = new File("data/");
             File[] files = file.listFiles();
 
             // 输出目录路径
-            String outputDir = "game/src/main/java/org/xubin/game/data/data/";
+            String outputDir = "src/main/java/org/xubin/game/data/data/";
 
             for (File f : files) {
                 if (f.getName().endsWith(".xlsx")) {

@@ -2,32 +2,29 @@ package org.xubin.game.account.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.xubin.game.LogService;
-import org.xubin.game.base.EntityCacheService;
-import org.xubin.game.base.GameContext;
-import org.xubin.game.database.game.user.dao.AccountDao;
-import org.xubin.game.database.game.user.entity.AccountEnt;
+import org.xubin.game.database.game.user.entity.Account;
 
+/**
+ * 账号服务
+ * @author xubin
+ */
 @Service
-public class AccountService implements EntityCacheService<AccountEnt, Long> {
-
+public class AccountService {
     @Autowired
-    private AccountDao accountDao;
+    private AccountCacheService accountCache;
 
-    public AccountEnt createNew(AccountEnt accountEnt) {
-        GameContext.getLogService().logNewAccount(accountEnt);
-        return putEntity(accountEnt);
+    public void createAccount(long accountId) {
+        Account account = new Account();
+        account.setId(accountId);
+        accountCache.insertAccount(account);
     }
 
-    @Override
-    public AccountEnt getEntity(Long id) {
-        return accountDao.findById(id).orElse(null);
+    public Account getAccount(Long id) {
+        return accountCache.getAccount(id);
     }
 
-    @Override
-    public AccountEnt putEntity(AccountEnt entity) {
-        GameContext.getPlayerService().addAccountProfile(entity);
-        GameContext.getAsyncDbService().saveToDb(entity);
-        return entity;
+    public void putAccount(Account entity) {
+        accountCache.putAccount(entity);
     }
+
 }

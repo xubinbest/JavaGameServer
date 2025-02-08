@@ -11,6 +11,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.xubin.game.base.GameContext;
 import org.xubin.game.database.game.BaseEntity;
 import org.xubin.game.database.game.faction.dao.FactionDao;
+import org.xubin.game.redis.CacheIndex;
+import org.xubin.game.redis.CacheIndexType;
 
 /**
  * 公会
@@ -22,6 +24,7 @@ import org.xubin.game.database.game.faction.dao.FactionDao;
 @Setter
 public class Faction implements BaseEntity<Long> {
     @Id
+    @CacheIndex(type = CacheIndexType.SINGLE)
     private long id;
     @Column
     private String name;
@@ -65,5 +68,18 @@ public class Faction implements BaseEntity<Long> {
     @Override
     public CrudRepository<Faction, Long> getCrudRepository() {
         return GameContext.getBean(FactionDao.class);
+    }
+
+    @Override
+    public String toString() {
+        return "Faction{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", level=" + level +
+                ", leaderId=" + leaderId +
+                ", createTime=" + createTime +
+                ", notice='" + notice + '\'' +
+                ", memberNum=" + memberNum +
+                '}';
     }
 }

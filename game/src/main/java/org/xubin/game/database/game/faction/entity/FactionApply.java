@@ -11,6 +11,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.xubin.game.base.GameContext;
 import org.xubin.game.database.game.BaseEntity;
 import org.xubin.game.database.game.faction.dao.FactionApplyDao;
+import org.xubin.game.redis.CacheIndex;
+import org.xubin.game.redis.CacheIndexType;
 
 @Entity
 @Table(name = "faction_apply")
@@ -21,8 +23,10 @@ public class FactionApply implements BaseEntity<Long> {
     @Id
     private long id;
     @Column
+    @CacheIndex(type = CacheIndexType.MULTIPLE)
     private long playerId;
     @Column
+    @CacheIndex(type = CacheIndexType.MULTIPLE)
     private long factionId;
     @Column
     private long applyTime;
@@ -60,4 +64,16 @@ public class FactionApply implements BaseEntity<Long> {
     public boolean isDelete() {
         return isDelete;
     }
+
+    @Override
+    public String toString() {
+        return "FactionApply{" +
+                "id=" + id +
+                ", playerId=" + playerId +
+                ", factionId=" + factionId +
+                ", applyTime=" + applyTime +
+                ", isDelete=" + isDelete +
+                '}';
+    }
+
 }

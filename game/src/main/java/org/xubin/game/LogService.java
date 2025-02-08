@@ -2,8 +2,8 @@ package org.xubin.game;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.xubin.game.database.game.user.entity.AccountEnt;
-import org.xubin.game.database.game.user.entity.PlayerEnt;
+import org.xubin.game.database.game.user.entity.Account;
+import org.xubin.game.database.game.user.entity.Player;
 import org.xubin.game.database.log.dao.NewAccountDao;
 import org.xubin.game.database.log.dao.NewPlayerDao;
 import org.xubin.game.database.log.entity.NewAccountEnt;
@@ -15,7 +15,7 @@ public class LogService {
     @Autowired
     NewAccountDao newAccountDao;
     // 新建账号日志
-    public void logNewAccount(AccountEnt account) {
+    public void logNewAccount(Account account) {
         NewAccountEnt newAccountEnt = new NewAccountEnt();
         newAccountEnt.setAccountId(account.getId());
         newAccountEnt.setAccountName(account.getName());
@@ -26,7 +26,7 @@ public class LogService {
     @Autowired
     NewPlayerDao newPlayerDao;
     // 新建玩家日志
-    public void logNewPlayer(PlayerEnt player) {
+    public void logNewPlayer(Player player) {
         NewPlayerEnt newPlayerEnt = new NewPlayerEnt();
         newPlayerEnt.setUserId(player.getId());
         newPlayerEnt.setUserName(player.getName());

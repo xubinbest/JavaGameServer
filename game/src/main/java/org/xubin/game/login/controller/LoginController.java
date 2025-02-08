@@ -3,7 +3,7 @@ package org.xubin.game.login.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.xubin.game.commons.Module;
+import org.xubin.game.commons.Modules;
 import org.xubin.game.login.message.CreatePlayerC2S;
 import org.xubin.game.login.message.LoginC2S;
 import org.xubin.game.login.message.SelectPlayerC2S;
@@ -15,7 +15,7 @@ import xbgame.socket.share.annotation.RequestHandler;
 
 @Controller
 @Slf4j
-@MessageRoute(module = Module.LOGIN)
+@MessageRoute(module = Modules.LOGIN)
 public class LoginController {
 
     @Autowired

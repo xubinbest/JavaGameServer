@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <link rel="stylesheet" href="./src/css/login.css">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-box">
+        <h2>登录</h2>
+        <form onsubmit="event.preventDefault(); login();">
+            <div class="input-group">
+                <input type="text" id="accountId" placeholder="请输入账号" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="请输入密码" required>
+            </div>
+            <div class="input-group">
+                <input type="text" id="captcha" placeholder="请输入验证码" required>
+            </div>
+            <div class="captcha-group">
+                <span id="captcha-container" class="captcha-text">验证码: 加载中...</span>
+                <button type="button" onclick="refreshCaptcha()">刷新验证码</button>
+            </div>
+            <div id="error-msg" style="color: red; margin-top: 10px;"></div>
+            <button type="submit" class="login-btn">登录</button>
+        </form>
+    </div>
+</div>
+<script src="./src/js/login.js"></script>
+</body>
+</html>
