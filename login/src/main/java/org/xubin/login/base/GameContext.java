@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.xubin.login.config.ServerConfig;
+import org.xubin.login.node.GameNodeService;
 import xbgame.socket.share.message.MessageFactory;
 
 import java.lang.annotation.Annotation;
@@ -45,6 +46,11 @@ public class GameContext implements ApplicationContextAware {
     private MessageFactory messageFactory;
     public static MessageFactory getMessageFactory() {
         return instance.messageFactory;
+    }
+
+    private GameNodeService gameNodeService;
+    public static GameNodeService getGameNodeService() {
+        return instance.gameNodeService;
     }
 
     public static <T> T getBean(Class<T> clazz) {

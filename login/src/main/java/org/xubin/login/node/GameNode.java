@@ -10,7 +10,12 @@ public class GameNode {
     private String ip;
     private int port;
     private String name;
+    // 是否为推荐服
     private int recommend;
+    // 后台状态. 0:关闭 1:开启 2:维护 3:繁忙 4:火爆
+    private int adminStatus;
+    // 服务器状态. 0:关闭 1:开启
+    private int gameStatus;
 
     @JSONField(serialize = false)
     private IdSession session;
@@ -22,7 +27,9 @@ public class GameNode {
                 ", ip='" + ip + '\'' +
                 ", port=" + port +
                 ", name='" + name + '\'' +
-                ", session=" + session +
+                ", recommend=" + recommend +
+                ", adminStatus=" + adminStatus +
+                ", gameStatus=" + gameStatus +
                 '}';
     }
 }

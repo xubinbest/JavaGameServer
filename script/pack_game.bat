@@ -6,3 +6,5 @@ REM 切换到项目根目录（xbgame目录）
 cd /d "%SCRIPT_DIR%..\"
 
 mvn clean dependency:copy-dependencies package -pl game -am
+
+pause

@@ -5,7 +5,7 @@ async function fetchServerList() {
         refreshBtn.classList.add('loading');
     }
     try {
-        const response = await fetch('http://192.168.101.21:8080/admin/serverList');
+        const response = await fetch('http://192.168.101.80:8080/admin/serverList');
         const data = await response.json();
         if (data.gameList) {
             displayServerList(data.gameList);
@@ -36,11 +36,11 @@ function displayServerList(servers) {
             </div>
             <div class="server-field">
                 <label>IP:</label>
-                <input type="text" value="${server.ip}">
+                <input type="text" value="${server.ip}" readonly>
             </div>
             <div class="server-field">
                 <label>端口:</label>
-                <input type="text" value="${server.port}">
+                <input type="text" value="${server.port}" readonly>
             </div>
             <div class="server-field">
                 <label>名称:</label>
@@ -49,6 +49,16 @@ function displayServerList(servers) {
             <div class="server-field">
                 <label>是否推荐:</label>
                 <input type="text" value="${server.recommend}">
+            </div>
+            <div class="server-field">
+                <label>状态:</label>
+                <select>
+                    <option value="0" ${parseInt(server.adminStatus) === 0 ? 'selected' : ''}>关闭</option>
+                    <option value="1" ${parseInt(server.adminStatus) === 1 ? 'selected' : ''}>开启</option>
+                    <option value="2" ${parseInt(server.adminStatus) === 2 ? 'selected' : ''}>维护</option>
+                    <option value="3" ${parseInt(server.adminStatus) === 3 ? 'selected' : ''}>繁忙</option>
+                    <option value="4" ${parseInt(server.adminStatus) === 4 ? 'selected' : ''}>火爆</option>
+                </select>
             </div>
             <button class="update-btn" onclick="updateServer(this)">更新</button>
         `;
@@ -60,17 +70,19 @@ function displayServerList(servers) {
 async function updateServer(button) {
     const serverItem = button.parentElement;
     const inputs = serverItem.getElementsByTagName('input');
+    const statusSelect = serverItem.querySelector('select');
 
     const serverData = {
         id: inputs[0].value,
         ip: inputs[1].value,
         port: inputs[2].value,
         name: inputs[3].value,
-        recommend: inputs[4].value
+        recommend: inputs[4].value,
+        adminStatus: parseInt(statusSelect.value, 10) 
     };
 
     try {
-        const response = await fetch('http://192.168.101.21:8080/admin/updateServerInfo', {
+        const response = await fetch('http://192.168.101.80:8080/admin/updateServerInfo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

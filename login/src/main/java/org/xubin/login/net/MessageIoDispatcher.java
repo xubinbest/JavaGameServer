@@ -55,6 +55,6 @@ public class MessageIoDispatcher extends ChainedMessageDispatcher {
 
     @Override
     public void onSessionClosed(IdSession session) {
-
+        GameContext.getGameNodeService().onServerClose(session);
     }
 }

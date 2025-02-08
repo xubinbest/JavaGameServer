@@ -62,7 +62,6 @@ public class LoginClient {
         msg.setId(config.getServerId());
         msg.setIp(config.getServerIp());
         msg.setPort(config.getServerPort());
-        logger.info("发送注册消息到登录服务器 {}", msg);
         send(msg);
     }
 

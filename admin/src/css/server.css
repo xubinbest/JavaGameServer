@@ -1,7 +1,7 @@
 /* 服务器管理页面样式 */
 .server-container {
     padding: 20px;
-    max-width: 1200px;
+    max-width: 1220px;
     margin: 0 auto;
 }
 
@@ -29,7 +29,7 @@
 .server-field label {
     font-weight: bold;
     margin-right: 5px;
-    min-width: 80px;
+    min-width: 30px;
 }
 
 .server-field input {
@@ -37,7 +37,19 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     width: 120px;
+    text-align: center;
 }
+
+.server-field select {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 120px;
+    background-color: #fff;
+    cursor: pointer;
+    text-align: center;
+}
+
 
 .update-btn {
     background-color: #28a745;
